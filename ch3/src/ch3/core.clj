@@ -90,7 +90,7 @@
 
 (defbolt heatmap-builder ["time-interval" "hotzones"]
   {:prepare true
-   :conf {"topology.tick.tuple.freq.secs" WINDOW_SIZE_SECONDS}}
+   :conf {TOPOLOGY_TICK_TUPLE_FREQ_SECS WINDOW_SIZE_SECONDS}}
   [conf context collector]
   (let [heatmaps (atom {})]
     (bolt
@@ -112,10 +112,10 @@
   (topology
    {"1" (spout-spec checkins :p 4)}
 
-   {"2" (bolt-spec {"1" :shuffle} geocode-lookup :p 8 :conf {"topology.tasks" 64})
+   {"2" (bolt-spec {"1" :shuffle} geocode-lookup :p 8 :conf {TOPOLOGY_TASKS 64})
     "3" (bolt-spec {"2" :shuffle} time-interval-extractor :p 4)
     "4" (bolt-spec {"3" ["time-interval" "city"]} heatmap-builder :p 4)
-    "5" (bolt-spec {"4" :shuffle} persistor :conf {"topology.tasks" 4})}))
+    "5" (bolt-spec {"4" :shuffle} persistor :conf {TOPOLOGY_TASKS 4})}))
 
 ;; RUN
 
