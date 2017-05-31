@@ -22,19 +22,21 @@
 ;; BOLTS
 
 (defbolt email-extractor ["email"]
-  [{:keys [commit]} collector]
+  [{:keys [commit] :as tuple} collector]
   (let [[_ email] (split commit #" ")]
-    (emit-bolt! collector [email])))
+    (emit-bolt! collector [email] :anchor tuple)
+    (ack! collector tuple)))
 
 (defbolt email-counter []
   {:prepare true}
   [conf context collector]
   (let [counts (atom {})]
     (bolt
-     (execute [{:keys [email]}]
+     (execute [{:keys [email] :as tuple}]
               (swap! counts #(update % email (fnil inc 0)))
               (doseq [[email c] @counts]
-                (println email "has count of" c))))))
+                (println email "has count of" c))
+              (ack! collector tuple)))))
 
 ;; TOPOLOGY
 
